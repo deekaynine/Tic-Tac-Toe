@@ -25,9 +25,12 @@ const createBoard = function(){
     return { board, markBoard, resetBoard}
 }
 
-const createGameLogic = function(){
+const createGameLogic = function(board){
     let isGameActive = true;
     let currentPlayer;
+    let gameBoard = board
+
+   
 
     const winning_combinations = [
         [0, 1, 2],
@@ -42,6 +45,7 @@ const createGameLogic = function(){
 
     function startGame(){
         this.isGameActive = true
+        
     }
 
     function endGame(){
@@ -50,66 +54,90 @@ const createGameLogic = function(){
 
    function setCurrentPlayer(player){
         this.currentPlayer = player
-   }
-
-    function checkForWin(board){
-        winning_combinations.forEach((pattern, i)=>{
-            let [first,second,third] = pattern[i]
-            if(board[first] === board[second] === board[third]){
-                return true
-            }
-            return false
-        })
+        
+        
     }
 
-    function checkForTie(board){
-        board.forEach((tile)=>{
-            if(tile === "-"){
-                return false
-            }
-        })
-        return true;
+    function checkForWin(){
+        let board = this.gameBoard.board
+        let winCheck;
+        for(let i=0; i < winning_combinations.length; i++){
+            let marker = this.currentPlayer.marker
+            let [first,second,third] = winning_combinations[i]
+            if(board[first] === marker && board[second] === marker && board[third] === marker){
+                console.log("a match")
+                winCheck = true
+                break;
+            } 
+            winCheck = false
+        }
+            
+            winCheck ? console.log("Match Found!") : console.log("Match not Found Yet.")
+            return winCheck
     }
 
-    return {startGame, endGame, setCurrentPlayer, checkForTie, checkForWin, isGameActive, currentPlayer}
+    function checkForTie(){
+        let board = this.gameBoard.board
+        let tieCheck = true;
+        for(let i=0; i<board.length; i++){
+            if(board[i] === "-"){
+                tieCheck = false
+                console.log("nope")
+                break;
+            }
+        }
+        tieCheck ? console.log("Tie") : console.log("Game not over")
+        return tieCheck
+        
+    }
+
+    return {startGame, endGame, setCurrentPlayer, checkForTie, checkForWin, isGameActive, currentPlayer, gameBoard, }
     }
 
 
 let gameBoard = createBoard()
-let gameLogic = createGameLogic()
+let gameLogic = createGameLogic(gameBoard)
 let player1 = new Player('Mark', 'X')
 let player2 = new Player ('Marcus','O')
-let testLogic = createGameLogic()
 
-
-gameLogic.startGame()
-console.log(gameLogic.currentPlayer)
 gameLogic.setCurrentPlayer(player1)
-console.log(gameLogic.currentPlayer)
+gameLogic.startGame()
 
 while(gameLogic.isGameActive){
     let currentPlayer = gameLogic.currentPlayer
+    let gameBoard = gameLogic.gameBoard
     let placeToMark = currentPlayer.makeChoice()
+    if(gameBoard.board[placeToMark] !== "-"){
+        while(gameBoard.board[placeToMark] !== "-"){
+
+            alert("Choose an empty tile.")
+            placeToMark = currentPlayer.makeChoice()
+        }
+    }
     gameBoard.markBoard(placeToMark, currentPlayer.marker)
-    if(gameBoard.checkForWin(gameBoard)){
+    console.log(gameBoard.board)
+
+    if(gameLogic.checkForWin()){
         gameLogic.endGame()
         console.log(`${currentPlayer.name}  wins!`)
-        console.log(gameBoard.board)
-        break
     }
-    if(gameBoard.checkForTie(gameBoard)){
+
+    if(gameLogic.checkForTie()){
         gameLogic.endGame()
         console.log(`It's a tie!`)
-        console.log(gameBoard.board)
-        break
     }
+
+
     if(currentPlayer === player1){
         gameLogic.setCurrentPlayer(player2)
-    }else{
-        gameLogic.setCurrentPlayer(player1)
+        console.log(`${gameLogic.currentPlayer.name}'s turn`)
     }
-    console.log(currentPlayer)
-    console.log(gameBoard.board)
+    
+    else{
+        gameLogic.setCurrentPlayer(player1)
+        console.log(gameLogic.currentPlayer)
+    }
+    
 }
 
 
